@@ -314,12 +314,12 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 		$params['course'] = $courseid;
 		$params['updatecontrol'] = $updatecontrol;
 		$params['uid'] = $USER->id;
-		$params['rate'] = 22;//$micrate;
-		$params['gain'] = 25;//$micgain;
+		$params['rate'] = $micrate;
+		$params['gain'] = $micgain;
 		$params['prefdevice'] = $micdevice;
 		$params['loopback'] = $micloopback;
 		$params['echosupression'] = $micecho;
-		$params['silencelevel'] = 10;
+		$params['silencelevel'] = $micsilence;
 		$params['filename'] = "123456.flv";
 		$params['assigName'] = $assigname;
 		$params['course'] = $courseid;
