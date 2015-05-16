@@ -1,0 +1,20 @@
+.que.timedrecording textarea.qtype_timedrecording_response {
+    width: 100%;
+}
+.que.timedrecording textarea.qtype_timedrecording_response.qtype_timedrecording_plain {
+    white-space: pre-wrap;
+    font: inherit;
+}
+.que.timedrecording textarea.qtype_timedrecording_response.qtype_timedrecording_monospaced {
+    white-space: pre;
+    font-family: Andale Mono, Monaco, Courier New, DejaVu Sans Mono, monospace;
+}
+.que.timedrecording .qtype_timedrecording_response {
+    min-height: 3em;
+}
+.que.timedrecording .qtype_timedrecording_response.readonly {
+    background-color: white;
+}
+.que.timedrecording div.qtype_timedrecording_response textarea {
+    width: 100%;
+}
