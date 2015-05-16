@@ -253,7 +253,7 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 		$PAGE->requires->js_init_call('M.qtype_timedrecording.init', array(),false,$jsmodule);
 		
 		//fetch the appopriate recorder
-		if($q->recorder=='red'){
+		if($q->recorder=='red5'){
 			$recorder = $this->fetchRed5TimedRecorderForSubmission('swf','question',
 				$inputid,$usercontextid ,'user','draft',$draftitemid,$preparetime,$recordtime,$autoforward,$mediaurl);
 		}else{
