@@ -67,7 +67,10 @@ class qtype_timedrecording_edit_form extends question_edit_form {
         $mform->addElement('editor', 'graderinfo', get_string('graderinfo', 'qtype_timedrecording'),
                 array('rows' => 10), $this->editoroptions);
 		
-		$mform->setDefault('defaultmark', 11);
+		//This was 1 for the original solution with custom grading
+		//seems more intuitive to make it 10
+		//$mform->setDefault('defaultmark', 11);
+		$mform->setDefault('defaultmark', 10);
     }
 
     protected function data_preprocessing($question) {
