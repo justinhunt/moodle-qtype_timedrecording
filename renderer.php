@@ -458,6 +458,9 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 				$params['preptimeleftlabel'] = $preptimeleftlabel;
 				$params['rectimeleftlabel'] = $rectimeleftlabel;
 				
+				//callbackjs
+				$params['callbackjs'] = 'M.qtype_timedrecording.callback';
+				
 				
 				if($mediaurl && $mediaurl!=""){
 					$params['mediaurl'] = $mediaurl;
