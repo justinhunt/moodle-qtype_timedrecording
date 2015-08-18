@@ -300,15 +300,15 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 		}
 		
 		//Get localised labels: 
-		$secondslabel = get_string('secondslabel', 'qtype_timedrecording');
-		$minutelabel = get_string('minutelabel', 'qtype_timedrecording');
-		$minuteslabel = get_string('minuteslabel', 'qtype_timedrecording');
-		$recordlabel = get_string('recordlabel', 'qtype_timedrecording');
-		$stoplabel = get_string('stoplabel', 'qtype_timedrecording');
-		$preptimelabel = get_string('preparationtime', 'qtype_timedrecording');
-		$rectimelabel = get_string('recordingtime', 'qtype_timedrecording');
-		$preptimeleftlabel = get_string('preparationtimeremaining', 'qtype_timedrecording');
-		$rectimeleftlabel = get_string('recordingtimeremaining', 'qtype_timedrecording');
+		$secondslabel = urlencode(get_string('secondslabel', 'qtype_timedrecording'));
+		$minutelabel = urlencode(get_string('minutelabel', 'qtype_timedrecording'));
+		$minuteslabel = urlencode(get_string('minuteslabel', 'qtype_timedrecording'));
+		$recordlabel = urlencode(get_string('recordlabel', 'qtype_timedrecording'));
+		$stoplabel = urlencode(get_string('stoplabel', 'qtype_timedrecording'));
+		$preptimelabel = urlencode(get_string('preparationtime', 'qtype_timedrecording'));
+		$rectimelabel = urlencode(get_string('recordingtime', 'qtype_timedrecording'));
+		$preptimeleftlabel = urlencode(get_string('preparationtimeremaining', 'qtype_timedrecording'));
+		$rectimeleftlabel = urlencode(get_string('recordingtimeremaining', 'qtype_timedrecording'));
 		
 		$params = array();
 		$params['course'] = $courseid;
