@@ -255,7 +255,8 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 		$hints=array();
 		$hints['resource']=$mediaurl;
 		$hints['mediaskin']=$q->recorder;
-		$recorder = \filter_poodll\poodlltools::fetchAudioRecorderForSubmission('swf','question',$inputid, $usercontextid ,'user','draft',$draftitemid,$recordtime,null, array());
+		$recorder = \filter_poodll\poodlltools::fetchAudioRecorderForSubmission('swf','question',$inputid, $usercontextid ,'user','draft',$draftitemid,$recordtime,false,
+            $hints);
 
 		
 		//fetch the appopriate recorder
