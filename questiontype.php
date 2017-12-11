@@ -102,14 +102,10 @@ class qtype_timedrecording extends question_type {
      * internal name => human-readable name.
      */
     public function response_formats() {
-    /*
+    
         return array(
             'audio' => get_string('formataudio', 'qtype_timedrecording'),
-			'video' => get_string('formatvideo', 'qtype_timedrecording'),
-        );
-    */
-        return array(
-            'audio' => get_string('formataudio', 'qtype_timedrecording')
+            'video' => get_string('formatvideo', 'qtype_timedrecording')
         );
     }
     
@@ -118,9 +114,10 @@ class qtype_timedrecording extends question_type {
      * internal name => human-readable name.
      */
     public function available_recorders() {
-        return array('mp3'=>get_string('mp3recorder', 'qtype_timedrecording'),
-        	'red5'=>get_string('red5recorder', 'qtype_timedrecording')
-        );
+    	$recorders = \filter_poodll\settingstools::fetch_html5_recorder_items();
+    	$recorders['shadow']='Shadow';
+    	$recorders['split']='Split';
+    	return $recorders;
     }
 
     /**

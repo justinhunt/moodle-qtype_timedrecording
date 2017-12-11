@@ -25,8 +25,6 @@
 
 
 defined('MOODLE_INTERNAL') || die();
-require_once($CFG->dirroot . '/filter/poodll/poodllresourcelib.php');
-require_once($CFG->dirroot . '/filter/poodll/poodllfilelib.php');
 
 /**
  * Generates the output for timedrecording questions.
@@ -252,8 +250,18 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 				);
 		$PAGE->requires->js_init_call('M.qtype_timedrecording.init', array(),false,$jsmodule);
 		
+		
+		//the context id is the user context for a student submission
+		$hints=array();
+		$hints['resource']=$mediaurl;
+		$hints['mediaskin']=$q->recorder;
+		$recorder = \filter_poodll\poodlltools::fetchAudioRecorderForSubmission('swf','question',$inputid, $usercontextid ,'user','draft',$draftitemid,$recordtime,null, array());
+
+		
 		//fetch the appopriate recorder
+		/*
 		if($q->recorder=='red5'){
+		
 			$recorder = $this->fetchRed5TimedRecorderForSubmission('swf','question',
 				$inputid,$usercontextid ,'user','draft',$draftitemid,$preparetime,$recordtime,$autoforward,$mediaurl);
 		}else{
@@ -262,6 +270,7 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 		
 		
 		}
+*/
 		
 		//return the html for the question
    		return $ret . $recorder;
@@ -366,159 +375,7 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 	
 	}
     
-    
-	function fetchRed5TimedRecorderForSubmission($runtime, $assigname, $updatecontrol="saveflvvoice",$contextid,$component,$filearea,$itemid,$preparetime,$recordtime,$autoforward,$mediaurl){
-		global $CFG, $USER, $COURSE;
-		
-		//Set the servername 
-		$flvserver = $CFG->poodll_media_server;
-		//Set the microphone config params
-		$micrate = $CFG->filter_poodll_micrate;
-		$micgain = $CFG->filter_poodll_micgain;
-		$micsilence = $CFG->filter_poodll_micsilencelevel;
-		$micecho = $CFG->filter_poodll_micecho;
-		$micloopback = $CFG->filter_poodll_micloopback;
-		$micdevice = $CFG->filter_poodll_studentmic;
-		
-		//removed from params to make way for moodle 2 filesystem params Justin 20120213
-		$userid="dummy";
-		$width="600";
-		$height="150";
-		$filename="12345"; 
-		$poodllfilelib= $CFG->wwwroot . '/filter/poodll/poodllfilelib.php';
-		
-		//Course ID should always be -1 for Moodle 2
-		$courseid = -1;
-
-		
-		//set up auto transcoding (mp3) or not
-		if($CFG->filter_poodll_audiotranscode){
-			$saveformat = "mp3";
-		}else{
-			$saveformat = "flv";
-		}
-		
-		//If no user id is passed in, try to get it automatically
-		//Not sure if  this can be trusted, but this is only likely to be the case
-		//when this is called from the filter. ie not from an assignment.
-		if ($userid=="") $userid = $USER->username;
-		
-		//Stopped using this 
-		//$filename = $CFG->filter_poodll_filename;
-		 $overwritemediafile = $CFG->filter_poodll_overwrite==1 ? "true" : "false" ;
-		if ($updatecontrol == "saveflvvoice"){
-			$savecontrol = "<input name='saveflvvoice' type='hidden' value='' id='saveflvvoice' />";
-		}else{
-			$savecontrol = "";
-		}
-		
-		//Get localised labels: 
-		$secondslabel = get_string('secondslabel', 'qtype_timedrecording');
-		$minutelabel = get_string('minutelabel', 'qtype_timedrecording');
-		$minuteslabel = get_string('minuteslabel', 'qtype_timedrecording');
-		$recordlabel = get_string('recordlabel', 'qtype_timedrecording');
-		$stoplabel = get_string('stoplabel', 'qtype_timedrecording');
-		$preptimelabel = get_string('preparationtime', 'qtype_timedrecording');
-		$rectimelabel = get_string('recordingtime', 'qtype_timedrecording');
-		$preptimeleftlabel = get_string('preparationtimeremaining', 'qtype_timedrecording');
-		$rectimeleftlabel = get_string('recordingtimeremaining', 'qtype_timedrecording');
-		
-		$params = array();
-		
-				$params['red5url'] = urlencode($flvserver);
-				$params['overwritefile'] = $overwritemediafile;
-				$params['rate'] = $micrate;
-				$params['gain'] = $micgain;
-				$params['prefdevice'] = $micdevice;
-				$params['loopback'] = $micloopback;
-				$params['echosupression'] = $micecho;
-				$params['silencelevel'] = $micsilence;
-				$params['filename'] = "123456.flv";
-				$params['assigName'] = $assigname;
-				$params['course'] = $courseid;
-				$params['updatecontrol'] = $updatecontrol;
-				$params['saveformat'] = $saveformat;
-				$params['uid'] = $userid;
-				//for file system in moodle 2
-				$params['poodllfilelib'] = $poodllfilelib;
-				$params['contextid'] = $contextid;
-				$params['component'] = $component;
-				$params['filearea'] = $filearea;
-				$params['itemid'] = $itemid;
-				$params['preparetime'] = $preparetime;
-				$params['recordtime'] = $recordtime;
-				$params['autoforward'] = $autoforward;
-				$params['secondslabel'] = $secondslabel;
-				$params['minutelabel'] = $minutelabel;
-				$params['minuteslabel'] = $minuteslabel;
-				$params['recordlabel'] = $recordlabel;
-				$params['stoplabel'] = $stoplabel;
-				$params['preptimelabel'] = $preptimelabel;
-				$params['rectimelabel'] = $rectimelabel;
-				$params['preptimeleftlabel'] = $preptimeleftlabel;
-				$params['rectimeleftlabel'] = $rectimeleftlabel;
-				
-				//callbackjs
-				$params['callbackjs'] = 'M.qtype_timedrecording.callback';
-				
-				
-				if($mediaurl && $mediaurl!=""){
-					$params['mediaurl'] = $mediaurl;
-				}
-			
-				$returnString=  $this->fetchTimedRecorderEmbedCode('PoodLLTimedRecorder.lzx.swf9.swf',
-									$params,$width,$height,'#CFCFCF');
-									
-				$returnString .= 	 $savecontrol;
-									
-				return $returnString ;
-	}
-	
-	//This is a bit ugly. It is just copied out of poodllresourcelib.php
-	//There, and here, it needs a rewrite.
-	function fetchTimedRecorderEmbedCode($widget,$paramsArray,$width,$height, $bgcolor="#FFFFFF"){
-		global $CFG, $PAGE, $EMBEDJSLOADED;
-		
-		//build the parameter string out of the passed in array
-		$params="?";
-		foreach ($paramsArray as $key => $value) {
-			$params .= '&' . $key . '=' . $value;
-		}
-		
-		//add in any common params
-		$params .= '&debug=false&lzproxied=false'; 
-		
-
-		
-		//added the global and conditional inclusion of embed js here because repo doesn't get the JS loaded in the header
-		//In other cases the load code at top of this file is on time. Justin 20120704
-		$embedcode="";
-		if(!$EMBEDJSLOADED){
-			$embedcode .= "<script type=\"text/javascript\" src=\"{$CFG->wwwroot}/filter/poodll/flash/embed-compressed.js\"></script> ";
-			$EMBEDJSLOADED=true;
-		}
-		
-		$retcode = "
-			<table><tr><td class=\"fitvidsignore\">
-			<script type=\'text/javascript\'>
-				lzOptions = { ServerRoot: \'\'};
-			</script> 
-		   " . $embedcode . "
-			<script type=\"text/javascript\">
-	" . '	lz.embed.swf({url: \'' . $CFG->wwwroot . '/question/type/timedrecording/flash/' . $widget . $params . 
-			 '\', bgcolor: \'' . $bgcolor . '\', cancelmousewheel: true, allowfullscreen: true, width: \'' .$width . '\', height: \'' . $height . '\', id: \'lzapp_' . rand(100000, 999999) . '\', accessible: true});	
-			
-	' . "
-			</script>
-			<noscript>
-				Please enable JavaScript in order to use this application.
-			</noscript>
-			</td></tr>
-			</table>";
-			
-			return $retcode;
-	}
-
+   
 }
 
 /**
