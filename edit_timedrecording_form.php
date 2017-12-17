@@ -38,20 +38,32 @@ class qtype_timedrecording_edit_form extends question_edit_form {
     protected function definition_inner($mform) {
         $qtype = question_bank::get_qtype('timedrecording');
 		
-		//this is not really necessary. Its a legacy of being based on teh PoodLL recording
-		//question type
+		//Response format: audio or video
+        /*
         $mform->addElement('select', 'responseformat',
                 get_string('responseformat', 'qtype_timedrecording'), $qtype->response_formats());
         $mform->setDefault('responseformat', 'editor');
+        */
+        $mform->addElement('hidden','responseformat','audio');
+        $mform->setType('responseformat',PARAM_TEXT);
         
-        //use the red5 recorder or the mp3 recorder
+        //The list of recorders
+        /*
         $recorders =$qtype->available_recorders();
          $mform->addElement('select', 'recorder',
                 get_string('recorder', 'qtype_timedrecording'), $recorders);
         $mform->setDefault('recorder', 'mp3');
-        
+        */
+        $mform->addElement('hidden','recorder','split');
+        $mform->setType('recorder',PARAM_TEXT);
+
+        //The preparation time
+        /*
     	$mform->addElement('duration', 'preparationtime', get_string('preparationtime', 'qtype_timedrecording'));
     	  $mform->setDefault('preparationtime', 20);
+        */
+        $mform->addElement('hidden','preparationtime',20);
+        $mform->setType('preparationtime',PARAM_INT);
     	
     	$mform->addElement('duration', 'recordingtime', get_string('recordingtime', 'qtype_timedrecording'));    
          $mform->setDefault('recordingtime', 30);

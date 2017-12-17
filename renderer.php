@@ -47,20 +47,27 @@ class qtype_timedrecording_renderer extends qtype_renderer {
         if (empty($options->readonly)) {
             $answer = $responseoutput->response_area_input('answer', $qa,
                     $step, 1, $options->context);
+            //we do not need a question because we embed it in the split recorder
+            $question_html = html_writer::tag('div', $question->format_questiontext($qa),
+                array('class' => 'qtext'));
+
 
         } else {
             $answer = $responseoutput->response_area_read_only('answer', $qa,
                     $step, 1, $options->context);
+            $question_html = html_writer::tag('div', $question->format_questiontext($qa),
+                array('class' => 'qtext'));
+
         }
 
 		
         $result = '';
-        $result .= html_writer::tag('div', $question->format_questiontext($qa),
-                array('class' => 'qtext'));
-
         $result .= html_writer::start_tag('div', array('class' => 'ablock'));
         $result .= html_writer::tag('div', $answer, array('class' => 'answer'));
         $result .= html_writer::end_tag('div');
+
+        $result .= $question_html;
+
 
         return $result;
     }
@@ -132,6 +139,23 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
         return 'qtype_timedrecording_audio';
     }
 
+    protected function get_submitted_file($name, $qa, $step, $context) {
+        //if we don't have an attempt, we don't have a submitted file
+        //if(!is_object($context)) return false;
+
+        //fetch file from storage and figure out URL
+        $storedfiles=$qa->get_last_qt_files($name,$context->id);
+        foreach ($storedfiles as $sf){
+            //when we find the file that matches the filename in $step, use that
+            $usefilename = strip_tags($step->get_qt_var($name));
+            $storedfilename = strip_tags($sf->get_filename());
+            if($usefilename === $storedfilename){
+                return $sf;
+            }
+        }
+        return false;
+    }
+
 	//This is not necessary, but when testing it can be handy to display this
 	protected function textarea($response, $lines, $attributes) {
         $attributes['class'] = $this->class_name() . ' qtype_essay_response';
@@ -150,53 +174,19 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
                 
     }
 
-    public function response_area_read_only($name, $qa, $step, $lines, $context) {	
-    		global $CFG,$PAGE;
-   			//fetch file from storage and figure out URL
-			$pathtofile="";
-    		$storedfiles=$qa->get_last_qt_files($name,$context->id);
-    		foreach ($storedfiles as $sf){
-    			$pathtofile=$qa->get_response_file_url($sf);
-    			break;
-    		}
-			
-			//replace score textbox with a dropdown list
-			//$PAGE->requires->yui2_lib('dom');
-			//$PAGE->requires->yui2_lib('element');
-			
-			$jsmodule = array('name'     => 'qtype_timedrecording',    
-					'fullpath' => '/question/type/timedrecording/module.js',    
-					'requires' => array('base', 'io', 'node', 'json'),    
-					'strings' => array(        
-							array('choosegrade', 'qtype_timedrecording'),        
-							array('novicelow', 'qtype_timedrecording'),        
-							array('novicemid', 'qtype_timedrecording'),        
-							array('novicehigh', 'qtype_timedrecording'),
-							array('intermediatelow', 'qtype_timedrecording'),        
-							array('intermediatemid', 'qtype_timedrecording'),        
-							array('intermediatehigh', 'qtype_timedrecording'), 
-							array('advancedlow', 'qtype_timedrecording'),        
-							array('advancedmid', 'qtype_timedrecording'),        
-							array('advancedhigh', 'qtype_timedrecording'), 
-							array('distinguished', 'qtype_timedrecording'),        
-							array('superior', 'qtype_timedrecording') 
-							)
-					);
-					
-			//JS dropdown grading thingy swapout js
-			//This was a feature of the original timed recording, but I have removed it for now because
-			//I needed to update the YUI code to YUI3, which I did. But it still needs some work. And
-			//I doubt this grading scale is generically useful . So its disabled .. for now. Justin 20150516
-			//$PAGE->requires->js_init_call('M.qtype_timedrecording.init_dropdown', array(),false,$jsmodule);
-			
-			//prepare audio player
-			if($pathtofile!=""){
-				 $files = fetchSimpleAudioPlayer('swf',$pathtofile,"http",400,25);
-			}else{
-				$files = "No recording found";
-			}
-			return $files;
+    public function response_area_read_only($name, $qa, $step, $lines, $context) {
+        //see if we have a file
+        $submittedfile = $this->get_submitted_file($name, $qa, $step, $context);
+
+        //if we do, we return the img link. If not, we return an empty string
+        if($submittedfile){
+            $pathtofile= $qa->get_response_file_url($submittedfile);
+            return  \filter_poodll\poodlltools::fetchSimpleAudioPlayer('auto',$pathtofile,"http",400,25);
+        }else{
+            return get_string("norecording",'qtype_timedrecording');
+        }
     }
+
 
 
     public function response_area_input($name, $qa, $step, $lines, $context) {
@@ -239,144 +229,30 @@ class qtype_timedrecording_format_audio_renderer extends plugin_renderer_base {
 		$files = $fs->get_area_files($q->contextid, 'qtype_timedrecording', 'mediaprompt', $q->id);
 		$mediaurl="";
 		if($files && count($files)>0){
-			$file = array_pop($files);
-			$mediaurl = $qa->rewrite_pluginfile_urls('@@PLUGINFILE@@/' . $file->get_filename(), $file->get_component(),$file->get_filearea() , $file->get_itemid());
+		    foreach ($files as $file) {
+                if ($file->is_directory()) {
+                    continue;
+                }
+                $mediaurl = $qa->rewrite_pluginfile_urls('@@PLUGINFILE@@/' . $file->get_filename(), $file->get_component(), $file->get_filearea(), $file->get_itemid());
+                break;
+            }
 		}
-		
-		//init the JS
-		$jsmodule = array('name'     => 'qtype_timedrecording',    
-				'fullpath' => '/question/type/timedrecording/module.js',    
-				'requires' => array('base')
-				);
-		$PAGE->requires->js_init_call('M.qtype_timedrecording.init', array(),false,$jsmodule);
-		
+
 		
 		//the context id is the user context for a student submission
 		$hints=array();
 		$hints['resource']=$mediaurl;
 		$hints['mediaskin']=$q->recorder;
+
 		$recorder = \filter_poodll\poodlltools::fetchAudioRecorderForSubmission('swf','question',$inputid, $usercontextid ,'user','draft',$draftitemid,$recordtime,false,
             $hints);
 
-		
-		//fetch the appopriate recorder
-		/*
-		if($q->recorder=='red5'){
-		
-			$recorder = $this->fetchRed5TimedRecorderForSubmission('swf','question',
-				$inputid,$usercontextid ,'user','draft',$draftitemid,$preparetime,$recordtime,$autoforward,$mediaurl);
-		}else{
-			$recorder = $this->fetchMP3TimedRecorderForSubmission('swf','question',
-				$inputid,$usercontextid ,'user','draft',$draftitemid,$preparetime,$recordtime,$autoforward,$mediaurl);
-		
-		
-		}
-*/
+
 		
 		//return the html for the question
    		return $ret . $recorder;
     }
 
-    
-    function fetchMP3TimedRecorderForSubmission($runtime, $assigname, $updatecontrol="saveflvvoice",$contextid,$component,$filearea,$itemid,$preparetime,$recordtime,$autoforward,$mediaurl){
-		global $CFG, $USER, $COURSE;
-
-		//Set the microphone config params
-		$micrate = $CFG->filter_poodll_micrate;
-		$micgain = $CFG->filter_poodll_micgain;
-		$micsilence = $CFG->filter_poodll_micsilencelevel;
-		$micecho = $CFG->filter_poodll_micecho;
-		$micloopback = $CFG->filter_poodll_micloopback;
-		$micdevice = $CFG->filter_poodll_studentmic;
-		
-		//removed from params to make way for moodle 2 filesystem params Justin 20120213
-		$width="600";
-		$height="150";
-		$poodllfilelib= $CFG->wwwroot . '/filter/poodll/poodllfilelib.php';
-		
-		$autosubmit='true';
-		$courseid = -1;
-		$canpause=false;
-		$saveformat="mp3";
-
-
-		//Stopped using this 
-		//$filename = $CFG->filter_poodll_filename;
-		 $overwritemediafile = $CFG->filter_poodll_overwrite==1 ? "true" : "false" ;
-		if ($updatecontrol == "saveflvvoice"){
-			$savecontrol = "<input name='saveflvvoice' type='hidden' value='' id='saveflvvoice' />";
-		}else{
-			$savecontrol = "";
-		}
-		
-		//Get localised labels: 
-		$secondslabel = urlencode(get_string('secondslabel', 'qtype_timedrecording'));
-		$minutelabel = urlencode(get_string('minutelabel', 'qtype_timedrecording'));
-		$minuteslabel = urlencode(get_string('minuteslabel', 'qtype_timedrecording'));
-		$recordlabel = urlencode(get_string('recordlabel', 'qtype_timedrecording'));
-		$stoplabel = urlencode(get_string('stoplabel', 'qtype_timedrecording'));
-		$preptimelabel = urlencode(get_string('preparationtime', 'qtype_timedrecording'));
-		$rectimelabel = urlencode(get_string('recordingtime', 'qtype_timedrecording'));
-		$preptimeleftlabel = urlencode(get_string('preparationtimeremaining', 'qtype_timedrecording'));
-		$rectimeleftlabel = urlencode(get_string('recordingtimeremaining', 'qtype_timedrecording'));
-		
-		$params = array();
-		$params['course'] = $courseid;
-		$params['updatecontrol'] = $updatecontrol;
-		$params['uid'] = $USER->id;
-		$params['rate'] = $micrate;
-		$params['gain'] = $micgain;
-		$params['prefdevice'] = $micdevice;
-		$params['loopback'] = $micloopback;
-		$params['echosupression'] = $micecho;
-		$params['silencelevel'] = $micsilence;
-		$params['filename'] = "123456.flv";
-		$params['assigName'] = $assigname;
-		$params['course'] = $courseid;
-		$params['updatecontrol'] = $updatecontrol;
-		$params['saveformat'] = $saveformat;
-		$params['posturl'] = $poodllfilelib;
-		$params['p1'] = $updatecontrol;
-		$params['p2'] = $contextid;
-		$params['p3'] = $component;
-		$params['p4'] = $filearea;
-		$params['p5'] = $itemid;
-		$params['autosubmit'] = $autosubmit;
-		$params['canpause'] = $canpause;
-		$params['preparetime'] = $preparetime;
-		$params['recordtime'] = $recordtime;
-		$params['autoforward'] = $autoforward;
-		$params['secondslabel'] = $secondslabel;
-		$params['minutelabel'] = $minutelabel;
-		$params['minuteslabel'] = $minuteslabel;
-		$params['recordlabel'] = $recordlabel;
-		$params['stoplabel'] = $stoplabel;
-		$params['preptimelabel'] = $preptimelabel;
-		$params['rectimelabel'] = $rectimelabel;
-		$params['preptimeleftlabel'] = $preptimeleftlabel;
-		$params['rectimeleftlabel'] = $rectimeleftlabel;
-		//callbackjs
-		$params['callbackjs'] = 'M.qtype_timedrecording.callback';
-		//mediaurl
-		if($mediaurl && $mediaurl!=""){
-			$params['mediaurl'] = $mediaurl;
-		}
-		//lang strings
-		//fetch and merge lang params
-		$langparams = filter_poodll_fetch_recorder_strings();
-		$params = array_merge($params, $langparams);
-			
-		$returnString=  $this->fetchTimedRecorderEmbedCode('PoodllMP3TimedRecorder.lzx.swf10.swf',
-							$params,$width,$height,'#CFCFCF');
-							
-		$returnString .= 	 $savecontrol;
-							
-		return $returnString ;
-			
-	
-	}
-    
-   
 }
 
 /**
@@ -404,6 +280,7 @@ class qtype_timedrecording_format_video_renderer extends qtype_timedrecording_fo
 			return fetchSimpleVideoPlayer('swf',$pathtofile,400,380,"http");
 	
     }
+
 
     public function response_area_input($name, $qa, $step, $lines, $context) {
     	global $USER;
