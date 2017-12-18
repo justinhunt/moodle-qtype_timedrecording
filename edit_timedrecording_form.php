@@ -46,7 +46,7 @@ class qtype_timedrecording_edit_form extends question_edit_form {
         */
         $mform->addElement('hidden','responseformat','audio');
         $mform->setType('responseformat',PARAM_TEXT);
-        
+
         //The list of recorders
         /*
         $recorders =$qtype->available_recorders();
