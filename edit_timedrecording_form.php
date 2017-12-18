@@ -67,10 +67,15 @@ class qtype_timedrecording_edit_form extends question_edit_form {
     	
     	$mform->addElement('duration', 'recordingtime', get_string('recordingtime', 'qtype_timedrecording'));    
          $mform->setDefault('recordingtime', 30);
-         
+
+         //Autoforward
+        /*
         $mform->addElement('advcheckbox', 'autoforward',
                     get_string('autoforward', 'qtype_timedrecording'),get_string('autoforwarddetails', 'qtype_timedrecording'));
             $mform->setDefault('autoforward', 1);
+        */
+        $mform->addElement('hidden','autoforward',1);
+        $mform->setType('autoforward',PARAM_INT);
 			
 		// audio as part of question resource
 		$mform->addElement('filemanager', 'mediaprompt', get_string('mediaprompt', 'qtype_timedrecording'), null,
