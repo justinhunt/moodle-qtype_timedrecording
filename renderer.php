@@ -62,11 +62,12 @@ class qtype_timedrecording_renderer extends qtype_renderer {
 
 		
         $result = '';
+        $result .= $question_html;
         $result .= html_writer::start_tag('div', array('class' => 'ablock'));
         $result .= html_writer::tag('div', $answer, array('class' => 'answer'));
         $result .= html_writer::end_tag('div');
 
-        $result .= $question_html;
+
 
 
         return $result;
