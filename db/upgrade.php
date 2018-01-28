@@ -133,6 +133,23 @@ function xmldb_qtype_timedrecording_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2015051500, 'qtype', 'timedrecording');
     }
 
+    if($oldversion < 2018012702){
+        $table = new xmldb_table('qtype_timedrecording_opts');
+        $qb_field = new xmldb_field('questionbody', XMLDB_TYPE_TEXT, 'small', null,
+            null, null, null);
+        $qbf_field = new xmldb_field('questionbodyformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED,
+            XMLDB_NOTNULL, null, '0');
+        if(!$dbman->field_exists($table,$qb_field)) {
+            $dbman->add_field($table, $qb_field);
+        }
+        if(!$dbman->field_exists($table,$qbf_field)) {
+            $dbman->add_field($table, $qbf_field);
+        }
+
+        // timedrecording savepoint reached
+        upgrade_plugin_savepoint(true, 2018012702, 'qtype', 'timedrecording');
+    }
+
     return true;
 
 }

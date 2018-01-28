@@ -80,6 +80,9 @@ class qtype_timedrecording extends question_type {
 		$options->graderinfo = $this->import_or_save_files($formdata->graderinfo,
                 $context, 'qtype_timedrecording', 'graderinfo', $formdata->id);
         $options->graderinfoformat = $formdata->graderinfo['format'];
+        $options->questionbody = $this->import_or_save_files($formdata->questionbody,
+            $context, 'qtype_timedrecording', 'questionbody', $formdata->id);
+        $options->questionbodyformat = $formdata->questionbody['format'];
         $DB->update_record('qtype_timedrecording_opts', $options);
     }
 
@@ -90,6 +93,8 @@ class qtype_timedrecording extends question_type {
         $question->responseformat = $questiondata->options->responseformat;
 		$question->graderinfo = $questiondata->options->graderinfo;
         $question->graderinfoformat = $questiondata->options->graderinfoformat;
+        $question->questionbody = $questiondata->options->questionbody;
+        $question->questionbodyformat = $questiondata->options->questionbodyformat;
         $question->preparationtime = $questiondata->options->preparationtime;
         $question->recordingtime = $questiondata->options->recordingtime;
          $question->autoforward = $questiondata->options->autoforward;
@@ -138,6 +143,8 @@ class qtype_timedrecording extends question_type {
         $fs = get_file_storage();
         $fs->move_area_files_to_new_context($oldcontextid,
                 $newcontextid, 'qtype_timedrecording', 'graderinfo', $questionid);
+        $fs->move_area_files_to_new_context($oldcontextid,
+            $newcontextid, 'qtype_timedrecording', 'questionbody', $questionid);
 		$fs->move_area_files_to_new_context($oldcontextid,
                 $newcontextid, 'qtype_timedrecording', 'mediaprompt', $questionid);
     }
@@ -146,6 +153,7 @@ class qtype_timedrecording extends question_type {
         parent::delete_files($questionid, $contextid);
         $fs = get_file_storage();
         $fs->delete_area_files($contextid, 'qtype_timedrecording', 'graderinfo', $questionid);
+        $fs->delete_area_files($contextid, 'qtype_timedrecording', 'questionbody', $questionid);
 		$fs->delete_area_files($contextid, 'qtype_timedrecording', 'mediaprompt', $questionid);
     }
 }

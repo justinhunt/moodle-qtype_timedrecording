@@ -36,6 +36,7 @@ $string['pluginname_link'] = 'question/type/timedrecording';
 $string['pluginnameadding'] = 'Adding a Timed Recording question';
 $string['pluginnameediting'] = 'Editing a Timed Recording question';
 $string['pluginnamesummary'] = 'Allows a recorded audio or video response. This must then be graded manually.';
+$string['questionbody'] = 'Question body';
 $string['responsefieldlines'] = 'Input box size';
 $string['responseformat'] = 'Response format';
 $string['recordingtime'] = 'Recording Time';

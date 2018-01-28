@@ -47,22 +47,31 @@ class qtype_timedrecording_renderer extends qtype_renderer {
         if (empty($options->readonly)) {
             $answer = $responseoutput->response_area_input('answer', $qa,
                     $step, 1, $options->context);
+
             //we do not need a question because we embed it in the split recorder
-            $question_html = html_writer::tag('div', $question->format_questiontext($qa),
+            $question_body = html_writer::tag('div',  $question->format_text(
+                $question->questionbody, $question->questionbody, $qa, 'qtype_timedrecording',
+                'questionbody', $question->id),
                 array('class' => 'qtext'));
 
 
         } else {
             $answer = $responseoutput->response_area_read_only('answer', $qa,
                     $step, 1, $options->context);
-            $question_html = html_writer::tag('div', $question->format_questiontext($qa),
+
+            //we do not need a question because we embed it in the split recorder
+            $question_body = html_writer::tag('div',  $question->format_text(
+                $question->questionbody, $question->questionbody, $qa, 'qtype_timedrecording',
+                'questionbody', $question->id),
                 array('class' => 'qtext'));
 
         }
 
-		
-        $result = '';
-        $result .= $question_html;
+		//question intro
+        $question_intro = $question->format_questiontext($qa);
+
+        $result = $question_intro;
+        $result .= $question_body;
         $result .= html_writer::start_tag('div', array('class' => 'ablock'));
         $result .= html_writer::tag('div', $answer, array('class' => 'answer'));
         $result .= html_writer::end_tag('div');

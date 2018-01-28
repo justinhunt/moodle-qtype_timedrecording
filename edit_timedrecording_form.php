@@ -47,6 +47,9 @@ class qtype_timedrecording_edit_form extends question_edit_form {
         $mform->addElement('hidden','responseformat','audio');
         $mform->setType('responseformat',PARAM_TEXT);
 
+        $mform->addElement('editor', 'questionbody', get_string('questionbody', 'qtype_timedrecording'),
+            array('rows' => 10), $this->editoroptions);
+
         //The list of recorders
         /*
         $recorders =$qtype->available_recorders();
@@ -119,7 +122,7 @@ class qtype_timedrecording_edit_form extends question_edit_form {
                 array('subdirs' => 0, 'maxbytes' => 0, 'maxfiles' => 1));
 		$question->mediaprompt = $draftitemid;
 
-
+        //grader info
         $draftid = file_get_submitted_draft_itemid('graderinfo');
         $question->graderinfo = array();
         $question->graderinfo['text'] = file_prepare_draft_area(
@@ -133,6 +136,21 @@ class qtype_timedrecording_edit_form extends question_edit_form {
         );
         $question->graderinfo['format'] = $question->options->graderinfoformat;
         $question->graderinfo['itemid'] = $draftid;
+
+        //question body
+        $draftid = file_get_submitted_draft_itemid('questionbody');
+        $question->questionbody = array();
+        $question->questionbody['text'] = file_prepare_draft_area(
+            $draftid,           // draftid
+            $this->context->id, // context
+            'qtype_timedrecording',      // component
+            'questionbody',       // filarea
+            !empty($question->id) ? (int) $question->id : null, // itemid
+            $this->fileoptions, // options
+            $question->options->questionbody // text
+        );
+        $question->questionbody['format'] = $question->options->questionbodyformat;
+        $question->questionbody['itemid'] = $draftid;
 
         return $question;
     }

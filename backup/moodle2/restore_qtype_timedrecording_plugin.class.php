@@ -70,7 +70,9 @@ class restore_qtype_timedrecording_plugin extends restore_qtype_plugin {
      */
     public static function define_decode_contents() {
         return array(
-            new restore_decode_content('qtype_timedrecording_opts', 'graderinfo', 'mediaprompt', 'qtype_timedrecording'),
+            new restore_decode_content('qtype_timedrecording_opts',
+                array('graderinfo','questionbody', 'mediaprompt'),
+                'qtype_timedrecording')
         );
     }
 
@@ -101,6 +103,8 @@ class restore_qtype_timedrecording_plugin extends restore_qtype_plugin {
             $defaultoptions->attachments = 0;
             $defaultoptions->graderinfo = '';
             $defaultoptions->graderinfoformat = FORMAT_HTML;
+            $defaultoptions->questionbody = '';
+            $defaultoptions->questionbodyformat = FORMAT_HTML;
             $defaultoptions->preparationtime = 30;
             $defaultoptions->recordingtime = 60;
 			 $defaultoptions->mediaprompt = '';

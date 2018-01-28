@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'qtype_timedrecording';
-$plugin->version   = 2017121100;
+$plugin->version   = 2018012702;
 $plugin->requires  = 2011070100.00 ;
 $plugin->maturity  = MATURITY_BETA;
 $plugin->release   = '2.0 (Build 2017121100)';

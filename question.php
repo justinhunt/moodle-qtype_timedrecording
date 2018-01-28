@@ -37,6 +37,8 @@ class qtype_timedrecording_question extends question_with_responses {
     public $responseformat;
 	public $graderinfo;
     public $graderinfoformat;
+    public $questionbody;
+    public $questionbodyformat;
     
    
 
@@ -107,10 +109,15 @@ class qtype_timedrecording_question extends question_with_responses {
 		 //perhaps for the play only once question, we might look here
 		 } else if ($component == 'qtype_timedrecording' && $filearea == 'mediaprompt') {
 			return true;
-        
+
+			//question body
+        } else if ($component == 'qtype_timedrecording' && $filearea == 'questionbody') {
+            return true;
 		
 		} else if ($component == 'qtype_timedrecording' && $filearea == 'graderinfo') {
             return $options->manualcomment;
+
+
 			
         } else {
             return parent::check_file_access($qa, $options, $component,

@@ -50,7 +50,7 @@ class backup_qtype_timedrecording_plugin extends backup_qtype_plugin {
         // Now create the qtype own structures
         $timedrecording = new backup_nested_element('timedrecording', array('id'), array(
                 'responseformat', 'recorder', 'responsefieldlines', 'attachments',
-                'graderinfo', 'graderinfoformat','preparationtime','recordingtime','mediaprompt','autoforward'));
+                'graderinfo', 'questionbody','graderinfoformat','questionbodyformat','preparationtime','recordingtime','mediaprompt','autoforward'));
 
         // Now the own qtype tree
         $pluginwrapper->add_child($timedrecording);
@@ -73,6 +73,7 @@ class backup_qtype_timedrecording_plugin extends backup_qtype_plugin {
     public static function get_qtype_fileareas() {
         return array(
             'graderinfo' => 'question_created',
+            'questionbody' => 'question_created',
 			'mediaprompt' => 'question_created'
         );
     }
