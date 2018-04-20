@@ -55,3 +55,4 @@ $string['recorder'] = 'Recorder';
 $string['mp3recorder'] = 'MP3 Recorder';
 $string['red5recorder'] = 'Red5 Recorder';
 $string['norecording'] = 'No recording was submitted';
+$string['privacy:metadata'] = 'The Poodll Timed Recording Question plugin does store personal data.';
