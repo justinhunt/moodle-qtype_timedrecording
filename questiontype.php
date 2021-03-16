@@ -115,7 +115,7 @@ class qtype_timedrecording extends question_type {
     }
     
     /**
-     * @return array the different response formats that the question type supports.
+     * @return array the different recorders that the question type supports.
      * internal name => human-readable name.
      */
     public function available_recorders() {

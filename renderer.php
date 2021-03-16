@@ -48,11 +48,18 @@ class qtype_timedrecording_renderer extends qtype_renderer {
             $answer = $responseoutput->response_area_input('answer', $qa,
                     $step, 1, $options->context);
 
-            //we do not need a question because we embed it in the split recorder
-            $question_body = html_writer::tag('div',  $question->format_text(
-                $question->questionbody, $question->questionbody, $qa, 'qtype_timedrecording',
-                'questionbody', $question->id),
-                array('class' => 'qtext'));
+            //What happens is that JS will poke a video preview window into the poodll_split_qbody div when the recorder loads
+            //we need to put the qbody_text into its own div, and that div within poodll_split_qbody, so we can lay those two out nicely.
+            //look for the video preview code in:
+            // /filter/poodll/amd/src/poodll_splitmediaskin.js function prepare_controlbar and function fetch_preview_video
+            $question_body_text ='<div class="poodll_split_qbody">';
+            $question_body_text .= '<div class="poodll_split_qbody_item poodll_split_qbody_text">';
+            $question_body_text .= $question->format_text(
+                    $question->questionbody, $question->questionbody, $qa, 'qtype_timedrecording',
+                    'questionbody', $question->id);
+            $question_body_text .= '</div></div>';
+            $question_body = html_writer::tag('div',  $question_body_text,
+                array('class' => 'qtext poodll_split_qtext'));
 
 
         } else {
@@ -63,7 +70,7 @@ class qtype_timedrecording_renderer extends qtype_renderer {
             $question_body = html_writer::tag('div',  $question->format_text(
                 $question->questionbody, $question->questionbody, $qa, 'qtype_timedrecording',
                 'questionbody', $question->id),
-                array('class' => 'qtext'));
+                array('class' => 'qtext poodll_split_qtext'));
 
         }
 
@@ -287,14 +294,13 @@ class qtype_timedrecording_format_video_renderer extends qtype_timedrecording_fo
     			break;
     		}
 
-			return fetchSimpleVideoPlayer('swf',$pathtofile,400,380,"http");
-	
+			return \filter_poodll\poodlltools::fetchSimpleVideoPlayer('swf',$pathtofile,400,380,"http");
     }
 
 
     public function response_area_input($name, $qa, $step, $lines, $context) {
     	global $USER;
-    	$usercontextid=get_context_instance(CONTEXT_USER, $USER->id)->id;
+    	$usercontextid= context_user::instance($USER->id)->id;
     	
 		//prepare a draft file id for use
 		list($draftitemid, $response) = $this->prepare_response_for_editing( $name, $step, $context);
@@ -312,11 +318,40 @@ class qtype_timedrecording_format_video_renderer extends qtype_timedrecording_fo
 		
 		$ret .= html_writer::empty_tag('input', array('type' => 'hidden','name' => $inputname . 'format', 'value' => FORMAT_PLAIN));
 
-       
-		//the context id $context->id here is wrong, so we just use "5" because it works, why is it wrong ..? J 20120214
-		return $ret . fetchVideoRecorderForSubmission('swf','question',$inputid, $usercontextid ,'user','draft',$draftitemid);
-		return $ret;
-		
+
+        $q = $qa->get_question();
+        $preparetime=$q->preparationtime;
+        $recordtime=$q->recordingtime;
+        if($q->autoforward){
+            $autoforward='true';
+        }else{
+            $autoforward='false';
+        }
+
+        // get file system handle for fetching url to submitted media prompt (if there is one)
+        $fs = get_file_storage();
+        $files = $fs->get_area_files($q->contextid, 'qtype_timedrecording', 'mediaprompt', $q->id);
+        $mediaurl="";
+        if($files && count($files)>0){
+            foreach ($files as $file) {
+                if ($file->is_directory()) {
+                    continue;
+                }
+                $mediaurl = $qa->rewrite_pluginfile_urls('@@PLUGINFILE@@/' . $file->get_filename(), $file->get_component(), $file->get_filearea(), $file->get_itemid());
+                break;
+            }
+        }
+
+        //the context id is the user context for a student submission
+        $hints=array();
+        $hints['resource']=$mediaurl;
+        $hints['mediaskin']=$q->recorder;
+		$recorder =\filter_poodll\poodlltools::fetchVideoRecorderForSubmission('swf','question',$inputid, $usercontextid ,
+                'user','draft',$draftitemid,$recordtime,false, $hints);
+
+
+        return $ret . $recorder;
+
     }
     
 }

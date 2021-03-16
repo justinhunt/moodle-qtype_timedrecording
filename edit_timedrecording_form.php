@@ -39,13 +39,11 @@ class qtype_timedrecording_edit_form extends question_edit_form {
         $qtype = question_bank::get_qtype('timedrecording');
 		
 		//Response format: audio or video
-        /*
         $mform->addElement('select', 'responseformat',
                 get_string('responseformat', 'qtype_timedrecording'), $qtype->response_formats());
-        $mform->setDefault('responseformat', 'editor');
-        */
-        $mform->addElement('hidden','responseformat','audio');
-        $mform->setType('responseformat',PARAM_TEXT);
+        $mform->setDefault('responseformat', 'audio');
+
+
 
         $mform->addElement('editor', 'questionbody', get_string('questionbody', 'qtype_timedrecording'),
             array('rows' => 10), $this->editoroptions);

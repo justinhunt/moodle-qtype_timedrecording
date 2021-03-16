@@ -18,3 +18,15 @@
 .que.timedrecording div.qtype_timedrecording_response textarea {
     width: 100%;
 }
+.poodll_split_qbody_item {
+    float: left;
+    margin: 10px;
+}
+.poodll_split_qbody_text {
+    min-width: 320px;
+}
+
+.poodll_split_qbody {
+    margin: auto;
+    width: fit-content;
+}
